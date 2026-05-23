@@ -1,0 +1,106 @@
+<!-- uiz.html -->
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Interaktiv Viktorina</title>
+  <style>
+    body { font-family: system-ui, sans-serif; background: #f1f5f9; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+    .container { background: white; padding: 2rem; border-radius: 16px; box-shadow: 0 8px 16px rgba(0,0,0,0.1); width: 90%; max-width: 500px; }
+    h1 { text-align: center; color: #1e293b; margin-bottom: 1.5rem; }
+    #question { font-size: 1.3rem; margin-bottom: 1rem; }
+    .options { display: flex; flex-direction: column; gap: 0.8rem; }
+    .opt-btn { padding: 1rem; border: 2px solid #e2e8f0; border-radius: 10px; background: white; cursor: pointer; font-size: 1rem; transition: 0.2s; text-align: left; }
+    .opt-btn:hover:not(:disabled) { background: #f8fafc; border-color: #3b82f6; }
+    .opt-btn.correct { background: #dcfce7; border-color: #22c55e; color: #166534; }
+    .opt-btn.wrong { background: #fee2e2; border-color: #ef4444; color: #991b1b; }
+    .controls { margin-top: 1.5rem; display: flex; justify-content: space-between; align-items: center; }
+    .hidden { display: none; }
+    .result-box { text-align: center; font-size: 1.2rem; padding: 1rem; background: #f0fdf4; border-radius: 10px; margin-top: 1rem; }
+    button { background: #3b82f6; color: white; border: none; padding: 0.8rem 1.2rem; border-radius: 8px; cursor: pointer; }
+    button:disabled { opacity: 0.5; cursor: not-allowed; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🧪 Bilim Viktorinasi</h1>
+    <div id="quiz-area">
+      <p id="question"></p>
+      <div class="options" id="options"></div>
+      <div class="controls">
+        <span id="progress">1 / 5</span>
+        <button id="next" disabled>Keyingi ➡️</button>
+      </div>
+    </div>
+    <div id="result" class="hidden result-box"></div>
+    <button id="restart" class="hidden" style="margin-top:1rem; width:100%">🔄 Qayta boshlash</button>
+  </div>
+
+  <script>
+    const questions = [
+      { q: "HTML da eng katta sarlavha qaysi teg?", o: ["<h6>", "<h1>", "<title>", "<header>"], a: 1 },
+      { q: "JavaScript da o'zgaruvchi qanday e'lon qilinadi?", o: ["var, let, const", "dim, int, str", "define, set, make", "variable, name, val"], a: 0 },
+      { q: "CSS da qaysi xususiyat matn rangini o'zgartiradi?", o: ["font-color", "text-color", "color", "background"], a: 2 },
+      { q: "LocalStorage ma'lumotlari qachon o'chadi?", o: ["Sahifa yopilganda", "Brauzer yopilganda", "Foydalanuvchi o'chirguncha", "1 soatdan keyin"], a: 2 },
+      { q: "HTTP da qaysi usul ma'lumotni yuborishda ishlatiladi?", o: ["GET", "POST", "DELETE", "HEAD"], a: 1 }
+    ];
+
+    let current = 0, score = 0;
+    const $q = document.getElementById("question");
+    const $opts = document.getElementById("options");
+    const $next = document.getElementById("next");
+    const $prog = document.getElementById("progress");
+    const $result = document.getElementById("result");
+    const $restart = document.getElementById("restart");
+
+    function loadQ() {
+      const q = questions[current];
+      $q.textContent = `🔹 ${current+1}. ${q.q}`;
+      $prog.textContent = `${current+1} / ${questions.length}`;
+      $opts.innerHTML = "";
+      $next.disabled = true;
+      q.o.forEach((opt, i) => {
+        const btn = document.createElement("button");
+        btn.className = "opt-btn";
+        btn.textContent = opt;
+        btn.onclick = () => check(i, btn);
+        $opts.appendChild(btn);
+      });
+    }
+
+    function check(idx, btn) {
+      const q = questions[current];
+      const opts = $opts.querySelectorAll(".opt-btn");
+      opts.forEach(b => b.disabled = true);
+      if (idx === q.a) { btn.classList.add("correct"); score++; }
+      else { btn.classList.add("wrong"); opts[q.a].classList.add("correct"); }
+      $next.disabled = false;
+    }
+
+    $next.onclick = () => {
+      current++;
+      if (current < questions.length) loadQ();
+      else showResult();
+    };
+
+    function showResult() {
+      document.getElementById("quiz-area").classList.add("hidden");
+      $result.classList.remove("hidden");
+      $restart.classList.remove("hidden");
+      const pct = Math.round((score / questions.length) * 100);
+      $result.innerHTML = `🏆 Natija: ${score}/${questions.length} (${pct}%)<br>${pct >= 80 ? "🌟 Ajoyib!" : pct >= 50 ? "👍 Yaxshi!" : "📚 Yana mashq qiling!"}`;
+    }
+
+    $restart.onclick = () => {
+      current = 0; score = 0;
+      document.getElementById("quiz-area").classList.remove("hidden");
+      $result.classList.add("hidden");
+      $restart.classList.add("hidden");
+      loadQ();
+    };
+
+    loadQ();
+  </script>
+</body>
+</html>
